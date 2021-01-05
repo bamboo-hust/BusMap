@@ -85,6 +85,8 @@ for route in routes:
             reverse = path
             break
     if forward and reverse:
+        route["forward"] = forward
+        route["reverse"] = reverse
         feasible_routes += [route]
 
 print(len(feasible_routes), "routes feasible")
