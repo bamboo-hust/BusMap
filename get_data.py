@@ -44,20 +44,50 @@ with open("routes.json") as f:
 
 # print(routes)
 
-def get_path(start_stop, end_stop):
-    path_request = requests.get("http://apicms.ebms.vn/pathfinding/getpathbystop/" + str(start_stop) + "/" + str(end_stop) + "/1")
-    return json.loads(path_request.text)
+# def get_path(start_stop, end_stop):
+#     path_request = requests.get("http://apicms.ebms.vn/pathfinding/getpathbystop/" + str(start_stop) + "/" + str(end_stop) + "/1")
+#     return json.loads(path_request.text)
 
+# for route in routes:
+#     stops_names = [each.strip() for each in route["RouteName"].split("-")]
+#     print(stops_names)
+#     start_stop = get_stop_id(stops_names[0])
+#     end_stop = get_stop_id(stops_names[-1])
+#     route["forward"] = get_path(start_stop, end_stop)
+#     route["reverse"] = get_path(end_stop, start_stop)
+#     with open("route_" + str(route["RouteId"]) + ".json", "w") as f:
+#         f.write(json.dumps(route))
+#     print("done route ", route["RouteName"])
+
+# with open("routes_details.json", "w") as f:
+#     f.write(json.dumps(routes))
+
+with open("routesdetails.json", "r") as f:
+    routes = json.loads(f.read())
+
+
+def extract_path(route, path):
+    for route_use in path["detail"]:
+        if route_use["RouteNo"] == route["RouteNo"]:
+            return True
+    return False
+
+feasible_routes = []
 for route in routes:
-    stops_names = [each.strip() for each in route["RouteName"].split("-")]
-    print(stops_names)
-    start_stop = get_stop_id(stops_names[0])
-    end_stop = get_stop_id(stops_names[-1])
-    route["forward"] = get_path(start_stop, end_stop)
-    route["reverse"] = get_path(end_stop, start_stop)
-    with open("route_" + str(route["RouteId"]) + ".json", "w") as f:
-        f.write(json.dumps(route))
-    print("done route ", route["RouteName"])
+    forward = None
+    reverse = None
+    for path in route["forward"]:
+        if extract_path(route, path):
+            forward = path
+            break
+    for path in route["reverse"]:
+        if extract_path(route, path):
+            reverse = path
+            break
+    if forward and reverse:
+        feasible_routes += [route]
 
-with open("routes_details.json") as f:
-    f.write(json.dumps(routes))
+print(len(feasible_routes), "routes feasible")
+
+with open("feasible_routes.json", "w") as f:
+    f.write(json.dumps(feasible_routes))
