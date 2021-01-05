@@ -57,26 +57,37 @@ function drawMarker(lat, lon) {
 async function solve() {
   let foo = await httpGet("/routes/route_1.json");
   let now = JSON.parse(foo);
-  now['forward'][0]['stops'].forEach(element => {
+
+  let bar = now['forward'][0]['coordRoute'];
+  console.log(bar[Object.keys(bar)[0]]);
+  // var firstKey = Object.keys(myObject)[0];
+
+  var latlngs = []
+
+  bar[Object.keys(bar)[0]].forEach(element => {
+    latlngs.push([element.Latitude, element.Longitude]);
     // drawMarker(element.Lat, element.Lng);
-    L.circle([element.Lat, element.Lng], {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 20
-      }).addTo(map);
+    // L.circle([element.Latitude, element.Longitude], {
+    //       color: 'red',
+    //       fillColor: '#f03',
+    //       fillOpacity: 0.5,
+    //       radius: 20
+    //   }).addTo(map);
   });
 
-  now['forward'][1]['stops'].forEach(element => {
-    // drawMarker(element.Lat, element.Lng);
-    L.circle([element.Lat, element.Lng], {
-          color: 'blue',
-          fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 20
-      }).addTo(map);
-  });
-  console.log(now);
+  var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+
+
+  // now['forward'][1]['stops'].forEach(element => {
+  //   // drawMarker(element.Lat, element.Lng);
+  //   L.circle([element.Lat, element.Lng], {
+  //         color: 'blue',
+  //         fillColor: '#f03',
+  //         fillOpacity: 0.5,
+  //         radius: 20
+  //     }).addTo(map);
+  // });
+  // console.log(now);
 
 }
 
