@@ -1,9 +1,11 @@
+// import path from "./path.json"
+
 // position we will use later
 var lat = 10.770822;
 var lon = 106.700233;
 
 // initialize map
-map = L.map('mapDiv').setView([lat, lon], 12);
+var map = L.map('mapDiv').setView([lat, lon], 12);
 
 // set map tiles source
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -12,10 +14,10 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // add marker to the map
-marker = L.marker([lat, lon]).addTo(map);
+// marker = L.marker([lat, lon]).addTo(map);
 
 // add popup to the marker
-marker.bindPopup("<b>ACME CO.</b><br />This st. 48<br />New York");
+// marker.bindPopup("<b>ACME CO.</b><br />This st. 48<br />New York");
 
 // var circle = L.circle([10.770822, 106.700233], {
 //     color: 'red',
@@ -25,18 +27,18 @@ marker.bindPopup("<b>ACME CO.</b><br />This st. 48<br />New York");
 
 // }).addTo(map);
 
-var popup = L.popup();
+// var popup = L.popup();
 
-var marker1 = L.marker([0,0]);
+// var marker1 = L.marker([0,0]);
 
-function onMapClick(e) {
-    console.log(e.latlng);
-    marker1.setLatLng(e.latlng);
-    marker1.addTo(map);
-    marker1.bindPopup("You clicked the map at " + marker1.getLatLng().toString());
-}
+// function onMapClick(e) {
+//     console.log(e.latlng);
+//     marker1.setLatLng(e.latlng);
+//     marker1.addTo(map);
+//     marker1.bindPopup("You clicked the map at " + marker1.getLatLng().toString());
+// }
 
-map.on('click', onMapClick);
+// map.on('click', onMapClick);
 
 
 // var circle = L.circle([lat, lon], {
@@ -48,4 +50,35 @@ map.on('click', onMapClick);
 
 // circle.bindPopup("I am a circle.");
 
-console.log(httpGet("http://apicms.ebms.vn/businfo/getstopsinbounds/106.68340787887573/10.768808774874774/106.72228231430054/10.786346643944889"))
+function drawMarker(lat, lon) {
+  marker = L.marker([lat, lon]).addTo(map);
+}
+
+async function solve() {
+  let foo = await httpGet("/routes/route_1.json");
+  let now = JSON.parse(foo);
+  now['forward'][0]['stops'].forEach(element => {
+    // drawMarker(element.Lat, element.Lng);
+    L.circle([element.Lat, element.Lng], {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0.5,
+          radius: 20
+      }).addTo(map);
+  });
+
+  now['forward'][1]['stops'].forEach(element => {
+    // drawMarker(element.Lat, element.Lng);
+    L.circle([element.Lat, element.Lng], {
+          color: 'blue',
+          fillColor: '#f03',
+          fillOpacity: 0.5,
+          radius: 20
+      }).addTo(map);
+  });
+  console.log(now);
+
+}
+
+
+solve();
