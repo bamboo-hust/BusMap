@@ -1,7 +1,7 @@
 const MAX_NUM_ROUTE = 3;
 const INF = 1e9;
 const MAX_PATH = 3;
-const MAX_WALKING_DIST = 3000;
+const MAX_WALKING_DIST = 1500;
 const MIN_BUS_DIST = 1000;
 const WALK_V = 5 // kph
 const BUS_V = 30 // kph
