@@ -168,6 +168,7 @@ async function findPath(e) {
   routes = getOptimalRoutes(markerSrc.getLatLng(), markerDes.getLatLng(), (u, v) => {
       return u.timeTraverse < v.timeTraverse;
   });
+  console.log(routes);
   all_routes = routes;
   let listResult = document.getElementById("list-result");
 
@@ -256,14 +257,40 @@ async function solve() {
 
 // solve();
 
-// async function main() {
-//   await init();
-//   startingPoint = L.latLng(10.77057946184975, 106.70505523681642);
-//   destination = L.latLng(10.850502899153025, 106.68788909912111);
-//   let all_routes = getOptimalRoutes(startingPoint, destination, (u, v) => {
-//     return u.dist < v.dist;
-//   });
-//   // console.log(all_routes);
-// }
+async function main() {
+  await init();
+  startingPoint = L.latLng(10.852526000673782, 106.66385650634767);
+  destination = L.latLng(10.850502899153025, 106.68788909912111);
+  let all_routes = getOptimalRoutes(startingPoint, destination, (u, v) => {
+    return u.dist < v.dist;
+  });
+
+  let listResult = document.getElementById("list-result");
+
+  // let responses = ["abc", "xyz", MAN_CHAR, BUS_CHAR, "\u{21e8}"];
+  listResult.innerHTML = "";
+  for (let i in all_routes) {
+    let routes = all_routes[i];
+    var node = document.createElement("li");
+    node.setAttribute("class", "list-group-item");
+    node.setAttribute("id", i)
+    node.setAttribute("onClick", "clickRoute(this.id)")
+    let displayString = "";
+    for (detail of routes["detail"]) {
+      if (detail["RouteNo"] == null) {
+        let time = (parseInt(detail["Time"] * 60));
+        var sub = document.createElement("sub");
+        sub.innerHTML = (time | 0) + 'p';
+        displayString += MAN_CHAR + sub.outerHTML + ARROW_CHAR;
+      } else {
+        var sub = document.createElement("sub");
+        sub.innerHTML = detail["RouteNo"]
+        displayString += BUS_CHAR + sub.outerHTML + ARROW_CHAR;
+      }
+    }
+    node.innerHTML = displayString.slice(0, -3);
+    listResult.appendChild(node);
+  }
+}
 
 // main();

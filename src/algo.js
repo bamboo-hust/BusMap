@@ -131,7 +131,7 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
                 for (let j = 0; j <= MAX_NUM_ROUTE; j++) {
                     if (used[i][j] == 1) continue;
                     if (cmp(dist[i][j], opt)) {
-                        optDist = dist[i][j];
+                        opt = dist[i][j];
                         u = i;
                         num = j;
                     }
@@ -224,7 +224,7 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
         let flag = false;
         while (curNode != stops.length) {
             let pre = dist[curNode][num].lastStop;
-            console.log(dist[curNode][num]);
+            // console.log(dist[curNode][num]);
             let now = {};
             let curPoint = getPoint(startingPoint, destination, curNode);
             let prePoint = getPoint(startingPoint, destination, pre);
