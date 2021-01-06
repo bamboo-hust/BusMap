@@ -99,7 +99,21 @@ routes_of = {}
 
 for route in feasible_routes:
     for direction in ["forward", "reverse"]:
+        get_in = ""
+        get_off = ""
+        for part in route[direction]["detail"]:
+            if part["RouteNo"] != None:
+                get_in = part["GetIn"]
+                get_off = part["GetOff"]
+                break
+        inside = False
         for stop in route[direction]["stops"]:
+            if stop["Name"] == get_in:
+                inside = True
+            if stop["Name"] == get_off:
+                inside = False
+            if not inside:
+                continue
             code = stop["Name"][str(stop["Name"]).find('[')+1:str(stop["Name"]).find(']')]
             if code not in routes_of:
                 routes_of[code] = []
