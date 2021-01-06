@@ -133,7 +133,12 @@ function clickRoute(id) {
 
 async function findPath(e) {
   // find shortest path here
-  all_routes = await getAllPath();
+  await init();
+  console.log(markerSrc.getLatLng());
+  routes = getOptimalRoutes(markerSrc.getLatLng(), markerDes.getLatLng(), (u, v) => {
+      return u.dist < v.dist;
+  });
+  all_routes = [routes];
   let listResult = document.getElementById("list-result");
 
 
@@ -225,9 +230,10 @@ async function solve() {
 //   await init();
 //   startingPoint = L.latLng(10.770822, 106.700233);
 //   destination = L.latLng(10.785822, 106.700233);
-//   getOptimalRoutes(startingPoint, destination, (u, v) => {
+//   let all_routes = getOptimalRoutes(startingPoint, destination, (u, v) => {
 //     return u.dist < v.dist;
 //   });
+//   console.log(all_routes);
 // }
 
 // main();
