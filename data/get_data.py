@@ -107,6 +107,7 @@ for route in feasible_routes:
                 get_off = part["GetOff"]
                 break
         inside = False
+        trunc_stops = []
         for stop in route[direction]["stops"]:
             if stop["Name"] == get_in:
                 inside = True
@@ -114,10 +115,12 @@ for route in feasible_routes:
                 inside = False
             if not inside:
                 continue
+            trunc_stops += [stop]
             code = stop["Name"][str(stop["Name"]).find('[')+1:str(stop["Name"]).find(']')]
             if code not in routes_of:
                 routes_of[code] = []
             routes_of[code] += [route["RouteNo"] + "_" + direction]
+        route[direction]["stops"] = trunc_stops
 
 new_stops = []
 for stop in stops:
@@ -128,3 +131,5 @@ for stop in stops:
 # print(new_stops)
 with open("stops_new.json", "w") as f:
     f.write(json.dumps(new_stops))
+with open("feasible_routes_new.json", "w") as f:
+    f.write(json.dumps(feasible_routes))
