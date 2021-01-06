@@ -11,6 +11,9 @@ var greenIcon = new L.Icon({
 });
 
 var COLOR = ['red', 'green', 'yellow'];
+var ARROW_CHAR = " \u{21e8} ";
+var MAN_CHAR = "\u{1f6b6}";
+var BUS_CHAR = "\u{1f68c}";
 
 var lat = 10.770822;
 var lon = 106.700233;
@@ -127,8 +130,35 @@ function showRoute(routes) {
 }
 
 
+function describeRoute(routes) {
+  let describe = document.getElementById("describe-route");
+  let content = "";
+  var br = document.createElement("br");
+  content += "Điểm xuất phát" + br.outerHTML;
+  let details = routes['detail'];
+  for (let j in details) {
+    detail = details[j];
+    if (detail["RouteNo"] == null) {
+      let time = (parseInt(detail["Distance"]) * 0.012) | 0;
+      content += MAN_CHAR + "Đi bộ " + time + " phút" + ARROW_CHAR;
+      if (detail["GetOff"] != null) {
+        content += detail["GetOff"] + br.outerHTML;
+      }
+    } else {
+      let time = (parseInt(detail["Distance"]) * 0.0015) | 0;
+      content += BUS_CHAR + "Đi xe " + time + " phút" + ARROW_CHAR;
+      if (detail["GetOff"] != null) {
+        content += detail["GetOff"] + br.outerHTML;
+      }
+    }
+  }
+  content += " Điểm đến";
+  describe.innerHTML = content;
+}
+
 function clickRoute(id) {
   showRoute(all_routes[id]);
+  describeRoute(all_routes[id]);
 }
 
 async function findPath(e) {
@@ -142,7 +172,7 @@ async function findPath(e) {
   let listResult = document.getElementById("list-result");
 
 
-  // let responses = ["abc", "xyz", "\u{1f6b6}", "\u{1f68c}", "\u{21e8}"];
+  // let responses = ["abc", "xyz", MAN_CHAR, BUS_CHAR, "\u{21e8}"];
   listResult.innerHTML = "";
   for (let i in all_routes) {
     let routes = all_routes[i];
@@ -156,11 +186,11 @@ async function findPath(e) {
         let time = (parseInt(detail["Distance"]) * 0.012);
         var sub = document.createElement("sub");
         sub.innerHTML = (time | 0)
-        displayString += "\u{1f6b6}" + sub.outerHTML + " \u{21e8} ";
+        displayString += MAN_CHAR + sub.outerHTML + ARROW_CHAR;
       } else {
         var sub = document.createElement("sub");
         sub.innerHTML = detail["RouteNo"]
-        displayString += "\u{1f68c}" + sub.outerHTML + " \u{21e8} ";
+        displayString += BUS_CHAR + sub.outerHTML + ARROW_CHAR;
       }
     }
     node.innerHTML = displayString.slice(0, -3);
