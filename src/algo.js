@@ -112,7 +112,7 @@ function getCoordRouteBetween(s, t, ID, type) {
 }
 
 function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
-    let banedRoute = new Set();
+    let bannedRoutes = new Set();
     let allRoute = [];
     for (let it = 0; it < NUM_SOLUTION; it++) {
         let dist = new Array(stops.length + 2);
@@ -199,7 +199,7 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
                     let type = element[1]
                     route = element[0];
                     let idRoute = routeNoToId[route];
-                    if (banedRoute.has(idRoute)) return;
+                    if (bannedRoutes.has(idRoute)) return;
                     if (idRoute === undefined) return;
     
                     let idInRoute = -1;
@@ -253,7 +253,8 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
         let stopLs = [];
         let coordRoute = {};
         let curNode = stops.length + 1;
-        let flag = false;
+        let maxRouteDist = 0;
+        let banRoute = -1;
         while (curNode != stops.length) {
             let pre = dist[curNode][num].lastStop;
             // console.log(dist[curNode][num]);
@@ -261,9 +262,9 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
             let curPoint = getPoint(startingPoint, destination, curNode);
             let prePoint = getPoint(startingPoint, destination, pre);
             if (dist[curNode][num].lastRoute != -1) {
-                if (!flag) {
-                    flag = 1;
-                    banedRoute.add(dist[curNode][num].lastRoute);
+                if (curPoint.distanceTo(prePoint) > maxRouteDist) {
+                    maxRouteDist = curPoint.distanceTo(prePoint);
+                    banRoute = dist[curNode][num].lastRoute;
                 }
                 now['RouteNo'] = routes[dist[curNode][num].lastRoute]['RouteNo'];
             }
@@ -306,6 +307,8 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
             }
             curNode = pre;
         }
+
+        bannedRoutes.add(banRoute);
         detail.reverse();
         stopLs.reverse();
         res['detail'] = detail;
