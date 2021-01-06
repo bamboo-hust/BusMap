@@ -139,13 +139,13 @@ function describeRoute(routes) {
   for (let j in details) {
     detail = details[j];
     if (detail["RouteNo"] == null) {
-      let time = (parseInt(detail["Distance"]) * 0.012) | 0;
+      let time = (parseInt(detail["Time"] * 60)) | 0;
       content += MAN_CHAR + "Đi bộ " + time + " phút" + ARROW_CHAR;
       if (detail["GetOff"] != null) {
         content += detail["GetOff"] + br.outerHTML;
       }
     } else {
-      let time = (parseInt(detail["Distance"]) * 0.0015) | 0;
+      let time = (parseInt(detail["Time"] * 60)) | 0;
       content += BUS_CHAR + "Đi xe " + time + " phút" + ARROW_CHAR;
       if (detail["GetOff"] != null) {
         content += detail["GetOff"] + br.outerHTML;
@@ -166,9 +166,9 @@ async function findPath(e) {
   await init();
   console.log(markerSrc.getLatLng());
   routes = getOptimalRoutes(markerSrc.getLatLng(), markerDes.getLatLng(), (u, v) => {
-      return u.dist < v.dist;
+      return u.timeTraverse < v.timeTraverse;
   });
-  all_routes = [routes];
+  all_routes = routes;
   let listResult = document.getElementById("list-result");
 
 
@@ -183,9 +183,9 @@ async function findPath(e) {
     let displayString = "";
     for (detail of routes["detail"]) {
       if (detail["RouteNo"] == null) {
-        let time = (parseInt(detail["Distance"]) * 0.012);
+        let time = (parseInt(detail["Time"] * 60));
         var sub = document.createElement("sub");
-        sub.innerHTML = (time | 0)
+        sub.innerHTML = (time | 0) + 'p';
         displayString += MAN_CHAR + sub.outerHTML + ARROW_CHAR;
       } else {
         var sub = document.createElement("sub");
@@ -258,12 +258,12 @@ async function solve() {
 
 // async function main() {
 //   await init();
-//   startingPoint = L.latLng(10.770822, 106.700233);
-//   destination = L.latLng(10.785822, 106.700233);
+//   startingPoint = L.latLng(10.77057946184975, 106.70505523681642);
+//   destination = L.latLng(10.850502899153025, 106.68788909912111);
 //   let all_routes = getOptimalRoutes(startingPoint, destination, (u, v) => {
 //     return u.dist < v.dist;
 //   });
-//   console.log(all_routes);
+//   // console.log(all_routes);
 // }
 
 // main();
