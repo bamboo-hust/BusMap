@@ -189,7 +189,11 @@ async function findPath(e) {
       return u.timeTraverse < v.timeTraverse;
   });
   console.log(routes);
-  document.getElementById("header").innerHTML = "Danh sách các chuyến xe : ";
+  if (routes.length > 0) {
+    document.getElementById("header").innerHTML = "Danh sách các chuyến xe : ";
+  } else {
+    document.getElementById("header").innerHTML = "Không tìm thấy đường đi!";
+  }
   all_routes = routes;
   let listResult = document.getElementById("list-result");
 
