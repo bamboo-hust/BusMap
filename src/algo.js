@@ -126,21 +126,29 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
             }
         }
         dist[stops.length][0] = new Node(0, 0, -1, -1, 0, 0, "");
-        while (true) {
-            let u = -1;
-            let num = -1;
-            let opt = new Node();
-            for (let i = 0; i < stops.length + 2; i++) {
-                for (let j = 0; j <= MAX_NUM_ROUTE; j++) {
-                    if (used[i][j] == 1) continue;
-                    if (cmp(dist[i][j], opt)) {
-                        opt = dist[i][j];
-                        u = i;
-                        num = j;
-                    }
-                }
+        let q = new PriorityQueue((a, b) => {
+            return cmp(a[2], b[2]);
+        });
+        q.push([stops.length, 0, dist[stops.length][0]]);
+        while (!q.isEmpty()) {
+            let topHeap = q.pop();
+            let u = topHeap[0];
+            let num = topHeap[1];
+            // let opt = new Node();
+            // for (let i = 0; i < stops.length + 2; i++) {
+            //     for (let j = 0; j <= MAX_NUM_ROUTE; j++) {
+            //         if (used[i][j] == 1) continue;
+            //         if (cmp(dist[i][j], opt)) {
+            //             opt = dist[i][j];
+            //             u = i;
+            //             num = j;
+            //         }
+            //     }
+            // }
+            // if (u === -1) break;
+            if (used[u][num] == 1) {
+                continue;
             }
-            if (u === -1) break;
             used[u][num] = 1;
             
             let curPoint = getPoint(startingPoint, destination, u);
@@ -160,6 +168,7 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
             
                         if (cmp(nextNode, dist[i][num])) {
                             dist[i][num] = nextNode;
+                            q.push([i, num, dist[i][num]]);
                         }
                     }
                 } else {
@@ -174,6 +183,7 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
             
                         if (cmp(nextNode, dist[i][num])) {
                             dist[i][num] = nextNode;
+                            q.push([i, num, dist[i][num]]);
                         }
                     }
                     for (let i = stops.length; i < stops.length + 2; i++) {
@@ -187,6 +197,7 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
             
                         if (cmp(nextNode, dist[i][num])) {
                             dist[i][num] = nextNode;
+                            q.push([i, num, dist[i][num]]);
                         }
                     }
                 }
@@ -231,6 +242,7 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
             
                         if (cmp(nextNode, dist[stopId][num + 1])) {
                             dist[stopId][num + 1] = nextNode;
+                            q.push([stopId, num + 1, dist[stopId][num + 1]]);
                         }
                     }
                 });
