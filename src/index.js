@@ -133,19 +133,35 @@ function showRoute(routes) {
 function describeRoute(routes) {
   let describe = document.getElementById("describe-route");
   let content = "";
-  var br = document.createElement("br");
-  content += "Điểm xuất phát" + br.outerHTML;
+  let total_time = 0;
   let details = routes['detail'];
   for (let j in details) {
     detail = details[j];
     if (detail["RouteNo"] == null) {
-      let time = (parseInt(detail["Time"] * 60)) | 0;
+      let time = Math.ceil(detail["Time"] * 60);
+      total_time += time;
+    } else {
+      let time = Math.ceil(detail["Time"] * 60);
+      total_time += time;
+    }
+  }
+
+  var br = document.createElement("br");
+  content += total_time + " phút : " + br.outerHTML;
+  content += "Điểm xuất phát" + br.outerHTML;
+
+  
+
+  for (let j in details) {
+    detail = details[j];
+    if (detail["RouteNo"] == null) {
+      let time = Math.ceil(detail["Time"] * 60);
       content += MAN_CHAR + "Đi bộ " + time + " phút" + ARROW_CHAR;
       if (detail["GetOff"] != null) {
         content += detail["GetOff"] + br.outerHTML;
       }
     } else {
-      let time = (parseInt(detail["Time"] * 60)) | 0;
+      let time = Math.ceil(detail["Time"] * 60);
       content += BUS_CHAR + "Đi xe " + time + " phút" + ARROW_CHAR;
       if (detail["GetOff"] != null) {
         content += detail["GetOff"] + br.outerHTML;
@@ -163,12 +179,17 @@ function clickRoute(id) {
 
 async function findPath(e) {
   // find shortest path here
+  clearMap();
+  document.getElementById("header").innerHTML = "Loading...";
+  findSrc = findDes = false;
+  document.getElementById("list-result").innerHTML = "";
+  document.getElementById("describe-route").innerHTML = "";
   await init();
-  console.log(markerSrc.getLatLng());
   routes = getOptimalRoutes(markerSrc.getLatLng(), markerDes.getLatLng(), (u, v) => {
       return u.timeTraverse < v.timeTraverse;
   });
   console.log(routes);
+  document.getElementById("header").innerHTML = "Danh sách các chuyến xe : ";
   all_routes = routes;
   let listResult = document.getElementById("list-result");
 
@@ -182,11 +203,27 @@ async function findPath(e) {
     node.setAttribute("id", i)
     node.setAttribute("onClick", "clickRoute(this.id)")
     let displayString = "";
-    for (detail of routes["detail"]) {
+
+    let total_time = 0;
+    let details = routes['detail'];
+    for (let j in details) {
+      detail = details[j];
       if (detail["RouteNo"] == null) {
-        let time = (parseInt(detail["Time"] * 60));
+        let time = Math.ceil(detail["Time"] * 60);
+        total_time += time;
+      } else {
+        let time = Math.ceil(detail["Time"] * 60);
+        total_time += time;
+      }
+    }
+
+    displayString += total_time + " phút : ";
+
+    for (detail of details) {
+      if (detail["RouteNo"] == null) {
+        let time = Math.ceil(detail["Time"] * 60);
         var sub = document.createElement("sub");
-        sub.innerHTML = (time | 0) + 'p';
+        sub.innerHTML = time + 'p';
         displayString += MAN_CHAR + sub.outerHTML + ARROW_CHAR;
       } else {
         var sub = document.createElement("sub");
@@ -217,80 +254,3 @@ map.on('click', onMapClick);
 function drawMarker(lat, lon) {
   marker = L.marker([lat, lon]).addTo(map);
 }
-
-async function solve() {
-  let foo = await httpGet("/routes/route_99.json");
-  let now = JSON.parse(foo);
-
-  let bar = now['forward'][0]['coordRoute'];
-  // console.log(bar[Object.keys(bar)[0]]);
-  // var firstKey = Object.keys(myObject)[0];
-
-  var latlngs = []
-
-  bar[Object.keys(bar)[0]].forEach(element => {
-    latlngs.push([element.Latitude, element.Longitude]);
-    // drawMarker(element.Lat, element.Lng);
-    // L.circle([element.Latitude, element.Longitude], {
-    //       color: 'red',
-    //       fillColor: '#f03',
-    //       fillOpacity: 0.5,
-    //       radius: 20
-    //   }).addTo(map);
-  });
-
-  var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
-
-
-  // now['forward'][1]['stops'].forEach(element => {
-  //   // drawMarker(element.Lat, element.Lng);
-  //   L.circle([element.Lat, element.Lng], {
-  //         color: 'blue',
-  //         fillColor: '#f03',
-  //         fillOpacity: 0.5,
-  //         radius: 20
-  //     }).addTo(map);
-  // });
-  // console.log(now);
-
-}
-
-// solve();
-
-async function main() {
-  await init();
-  startingPoint = L.latLng(10.852526000673782, 106.66385650634767);
-  destination = L.latLng(10.850502899153025, 106.68788909912111);
-  let all_routes = getOptimalRoutes(startingPoint, destination, (u, v) => {
-    return u.dist < v.dist;
-  });
-
-  let listResult = document.getElementById("list-result");
-
-  // let responses = ["abc", "xyz", MAN_CHAR, BUS_CHAR, "\u{21e8}"];
-  listResult.innerHTML = "";
-  for (let i in all_routes) {
-    let routes = all_routes[i];
-    var node = document.createElement("li");
-    node.setAttribute("class", "list-group-item");
-    node.setAttribute("id", i)
-    node.setAttribute("onClick", "clickRoute(this.id)")
-    let displayString = "";
-    for (detail of routes["detail"]) {
-      if (detail["RouteNo"] == null) {
-        let time = (parseInt(detail["Time"] * 60));
-        var sub = document.createElement("sub");
-        sub.innerHTML = (time | 0) + 'p';
-        displayString += MAN_CHAR + sub.outerHTML + ARROW_CHAR;
-      } else {
-        var sub = document.createElement("sub");
-        sub.innerHTML = detail["RouteNo"]
-        displayString += BUS_CHAR + sub.outerHTML + ARROW_CHAR;
-      }
-    }
-    node.innerHTML = displayString.slice(0, -3);
-    listResult.appendChild(node);
-  }
-}
-
-// main();

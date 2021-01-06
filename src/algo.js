@@ -7,9 +7,9 @@ const WALK_V = 5 // kph
 const BUS_V = 30 // kph
 const NUM_SOLUTION = 7;
 
-let stopCodeToID = {}
+var stopCodeToID = {}
 let stops;
-let routes;
+var routes;
 let routeNoToId = {}
 let adj = []
 
