@@ -1,6 +1,17 @@
 // import path from "./path.json"
 
 // position we will use later
+var greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+var COLOR = ['red', 'green', 'yellow'];
+
 var lat = 10.770822;
 var lon = 106.700233;
 
@@ -13,32 +24,149 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
-// add marker to the map
-// marker = L.marker([lat, lon]).addTo(map);
+var all_routes = [];
 
-// add popup to the marker
-// marker.bindPopup("<b>ACME CO.</b><br />This st. 48<br />New York");
+var findSrc = false;
+var findDes = false;
 
-// var circle = L.circle([10.770822, 106.700233], {
-//     color: 'red',
-//     fillColor: '#f03',
-//     fillOpacity: 0.5,
-//     radius: 500
+function chooseSrc(e) {
+  findSrc = true;
+  findDes = false;
+}
 
-// }).addTo(map);
+function chooseDes(e) {
+  findDes = true;
+  findSrc = false;
+}
 
-// var popup = L.popup();
+var markerSrc = L.marker([0,0]);
+var markerDes = L.marker([0,0], {icon : greenIcon});
 
-// var marker1 = L.marker([0,0]);
+function onMapClick(e) {
+  if (findSrc) {
+    console.log(e.latlng);
+    markerSrc.setLatLng(e.latlng);
+    markerSrc.addTo(map);
+    markerSrc.bindPopup("You clicked the map at " + markerSrc.getLatLng().toString());
+  }
+  if (findDes) {
+    console.log(e.latlng);
+    markerDes.setLatLng(e.latlng);
+    markerDes.addTo(map);
+    markerDes.bindPopup("You clicked the map at " + markerDes.getLatLng().toString()); 
+  }
+}
 
-// function onMapClick(e) {
-//     console.log(e.latlng);
-//     marker1.setLatLng(e.latlng);
-//     marker1.addTo(map);
-//     marker1.bindPopup("You clicked the map at " + marker1.getLatLng().toString());
-// }
+function showLine(pointA, pointB) {
+  var pointList = [pointA, pointB];
 
-// map.on('click', onMapClick);
+  var firstpolyline = new L.Polyline(pointList, {
+      color: 'black',
+      weight: 3,
+      opacity: 0.5,
+      smoothFactor: 1
+  });
+  firstpolyline.addTo(map);
+}
+
+function clearMap() {
+    for(i in map._layers) {
+        if(map._layers[i]._path != undefined) {
+            try {
+                map.removeLayer(map._layers[i]);
+            }
+            catch(e) {
+                console.log("problem with " + e + map._layers[i]);
+            }
+        }
+    }
+}
+
+
+function showRoute(routes) {
+  clearMap();
+  console.log(routes);
+  let color_index = 0;
+  let bars = routes['coordRoute'];
+
+  for (let j in bars) {
+    var latlngs = []
+
+    bars[j].forEach(element => {
+      latlngs.push([element.Latitude, element.Longitude]);
+    });
+
+    var polyline = L.polyline(latlngs, {color: COLOR[color_index]}).addTo(map);
+    color_index = (color_index + 1) % COLOR.length;
+  }
+  let details = routes['detail'];
+  for (let j in details) {
+    detail = details[j];
+    var pointA = new L.LatLng(detail["GetInLat"], detail["GetInLng"]);
+    var pointB = new L.LatLng(detail["GetOffLat"], detail["GetOffLng"]);
+    if (j == 0) {
+      showLine(markerSrc.getLatLng(), pointA);
+    }
+    if (detail['RouteNo'] == null) {
+      showLine(pointA, pointB)
+    }
+    if ((Number(j) + 1 == details.length)) {
+      showLine(pointB, markerDes.getLatLng()); 
+    }
+  }
+
+  let stops = routes['stops'];
+  for (stop of stops) {
+    var circle = L.circle([stop['Lat'], stop['Lng']], {
+      color: 'black',
+      fillColor: 'white',
+      fillOpacity: 0.5,
+      radius: 10
+    }).addTo(map);
+  }
+}
+
+
+function clickRoute(id) {
+  showRoute(all_routes[id]);
+}
+
+async function findPath(e) {
+  // find shortest path here
+  all_routes = await getAllPath();
+  let listResult = document.getElementById("list-result");
+
+
+  // let responses = ["abc", "xyz", "\u{1f6b6}", "\u{1f68c}", "\u{21e8}"];
+  listResult.innerHTML = "";
+  for (let i in all_routes) {
+    let routes = all_routes[i];
+    var node = document.createElement("li");
+    node.setAttribute("class", "list-group-item");
+    node.setAttribute("id", i)
+    node.setAttribute("onClick", "clickRoute(this.id)")
+    let displayString = "";
+    for (detail of routes["detail"]) {
+      if (detail["RouteNo"] == null) {
+        let time = (parseInt(detail["Distance"]) * 0.012);
+        var sub = document.createElement("sub");
+        sub.innerHTML = (time | 0)
+        displayString += "\u{1f6b6}" + sub.outerHTML + " \u{21e8} ";
+      } else {
+        var sub = document.createElement("sub");
+        sub.innerHTML = detail["RouteNo"]
+        displayString += "\u{1f68c}" + sub.outerHTML + " \u{21e8} ";
+      }
+    }
+    node.innerHTML = displayString.slice(0, -3);
+    listResult.appendChild(node);
+  }
+}
+
+
+// findPath(null)
+
+map.on('click', onMapClick);
 
 
 // var circle = L.circle([lat, lon], {
@@ -54,42 +182,3 @@ function drawMarker(lat, lon) {
   marker = L.marker([lat, lon]).addTo(map);
 }
 
-async function solve() {
-  let foo = await httpGet("/routes/route_1.json");
-  let now = JSON.parse(foo);
-
-  let bar = now['forward'][0]['coordRoute'];
-  console.log(bar[Object.keys(bar)[0]]);
-  // var firstKey = Object.keys(myObject)[0];
-
-  var latlngs = []
-
-  bar[Object.keys(bar)[0]].forEach(element => {
-    latlngs.push([element.Latitude, element.Longitude]);
-    // drawMarker(element.Lat, element.Lng);
-    // L.circle([element.Latitude, element.Longitude], {
-    //       color: 'red',
-    //       fillColor: '#f03',
-    //       fillOpacity: 0.5,
-    //       radius: 20
-    //   }).addTo(map);
-  });
-
-  var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
-
-
-  // now['forward'][1]['stops'].forEach(element => {
-  //   // drawMarker(element.Lat, element.Lng);
-  //   L.circle([element.Lat, element.Lng], {
-  //         color: 'blue',
-  //         fillColor: '#f03',
-  //         fillOpacity: 0.5,
-  //         radius: 20
-  //     }).addTo(map);
-  // });
-  // console.log(now);
-
-}
-
-
-solve();
