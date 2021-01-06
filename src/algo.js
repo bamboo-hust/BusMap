@@ -16,6 +16,9 @@ let adj = []
 async function init() {
     stops = await httpGet("/data/stops_new.json");
     stops = JSON.parse(stops);
+    stops.sort((a, b) => {
+        return a.Lat < b.Lat;
+    });
     for (let i = 0; i < stops.length; i++) {
         stopCodeToID[stops[i]["Code"]] = i;
     }
@@ -145,17 +148,46 @@ function getOptimalRoutes(startingPoint, destination, cmp) { // LatLng type
     
             // walk
             if (curNode.lastRoute != -1 || u == stops.length) {
-                for (let i = 0; i < stops.length + 2; i++) {
-                    let nextPoint = getPoint(startingPoint, destination, i);
-                    if (used[i][num] === 1) continue;
-                    
-                    let nextDist = curPoint.distanceTo(nextPoint);
-                    if (nextDist > MAX_WALKING_DIST) continue;
-                    let nextNode = new Node(curNode.dist + nextDist, 
-                        curNode.walkingDist + nextDist, u, -1, curNode.timeTraverse + nextDist / WALK_V / 1000, num, "");
-        
-                    if (cmp(nextNode, dist[i][num])) {
-                        dist[i][num] = nextNode;
+                if (u >= stops.length) {
+                    for (let i = 0; i < stops.length + 2; i++) {
+                        let nextPoint = getPoint(startingPoint, destination, i);
+                        if (used[i][num] === 1) continue;
+                        
+                        let nextDist = curPoint.distanceTo(nextPoint);
+                        if (nextDist > MAX_WALKING_DIST) continue;
+                        let nextNode = new Node(curNode.dist + nextDist, 
+                            curNode.walkingDist + nextDist, u, -1, curNode.timeTraverse + nextDist / WALK_V / 1000, num, "");
+            
+                        if (cmp(nextNode, dist[i][num])) {
+                            dist[i][num] = nextNode;
+                        }
+                    }
+                } else {
+                    for (let i = Math.max(0, u - 300); i <= Math.min(stops.length - 1, u + 300); i++) {
+                        let nextPoint = getPoint(startingPoint, destination, i);
+                        if (used[i][num] === 1) continue;
+                        
+                        let nextDist = curPoint.distanceTo(nextPoint);
+                        if (nextDist > MAX_WALKING_DIST) continue;
+                        let nextNode = new Node(curNode.dist + nextDist, 
+                            curNode.walkingDist + nextDist, u, -1, curNode.timeTraverse + nextDist / WALK_V / 1000, num, "");
+            
+                        if (cmp(nextNode, dist[i][num])) {
+                            dist[i][num] = nextNode;
+                        }
+                    }
+                    for (let i = stops.length; i < stops.length + 2; i++) {
+                        let nextPoint = getPoint(startingPoint, destination, i);
+                        if (used[i][num] === 1) continue;
+                        
+                        let nextDist = curPoint.distanceTo(nextPoint);
+                        if (nextDist > MAX_WALKING_DIST) continue;
+                        let nextNode = new Node(curNode.dist + nextDist, 
+                            curNode.walkingDist + nextDist, u, -1, curNode.timeTraverse + nextDist / WALK_V / 1000, num, "");
+            
+                        if (cmp(nextNode, dist[i][num])) {
+                            dist[i][num] = nextNode;
+                        }
                     }
                 }
             }

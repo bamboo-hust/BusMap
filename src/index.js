@@ -190,7 +190,7 @@ async function findPath(e) {
         displayString += MAN_CHAR + sub.outerHTML + ARROW_CHAR;
       } else {
         var sub = document.createElement("sub");
-        sub.innerHTML = detail["RouteNo"]
+        sub.innerHTML = detail["RouteNo"];
         displayString += BUS_CHAR + sub.outerHTML + ARROW_CHAR;
       }
     }
