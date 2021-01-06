@@ -93,3 +93,24 @@ print(len(feasible_routes), "routes feasible")
 
 with open("feasible_routes.json", "w") as f:
     f.write(json.dumps(feasible_routes))
+
+
+routes_of = {}
+
+for route in feasible_routes:
+    for direction in ["forward", "reverse"]:
+        for stop in route[direction]["stops"]:
+            code = stop["Name"][str(stop["Name"]).find('[')+1:str(stop["Name"]).find(']')]
+            if code not in routes_of:
+                routes_of[code] = []
+            routes_of[code] += [route["RouteNo"] + "_" + direction]
+
+new_stops = []
+for stop in stops:
+    if stop["Code"] in routes_of:
+        stop["Routes"] = routes_of[stop["Code"]]
+        new_stops += [stop]
+
+# print(new_stops)
+with open("stops_new.json", "w") as f:
+    f.write(json.dumps(new_stops))
