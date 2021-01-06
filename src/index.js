@@ -55,11 +55,11 @@ function drawMarker(lat, lon) {
 }
 
 async function solve() {
-  let foo = await httpGet("/routes/route_1.json");
+  let foo = await httpGet("/routes/route_99.json");
   let now = JSON.parse(foo);
 
   let bar = now['forward'][0]['coordRoute'];
-  console.log(bar[Object.keys(bar)[0]]);
+  // console.log(bar[Object.keys(bar)[0]]);
   // var firstKey = Object.keys(myObject)[0];
 
   var latlngs = []
@@ -91,5 +91,15 @@ async function solve() {
 
 }
 
-
 solve();
+
+async function main() {
+  await init();
+  startingPoint = L.latLng(10.770822, 106.700233);
+  destination = L.latLng(10.785822, 106.700233);
+  getOptimalRoutes(startingPoint, destination, (u, v) => {
+    return u.dist < v.dist;
+  });
+}
+
+main();
